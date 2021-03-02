@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def read_index(type):
+def read_index(type, header='appliance'):
     with open('data/source/metadata_submetered.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
@@ -12,8 +12,8 @@ def read_index(type):
         label_index = {}
         for i in range(metadata_len):
             try:
-                label = meta[str(i + 1)]['appliance'][str(type)]
-            except TypeError:
+                label = meta[str(i + 1)][header][str(type)]
+            except NameError:
                 print('第{}个样本没有属性{}'.format(i + 1, type))
             else:
                 if label in label_index.keys():
@@ -23,8 +23,45 @@ def read_index(type):
         return label_index
 
 
+# test read_index
+# ri = read_index('load')
+# print(ri)
+
+
+def read_correlation(name,
+                     type,
+                     name_header='appliance',
+                     type_header='appliance'):
+    with open('data/source/metadata_submetered.json', 'r',
+              encoding='utf8') as load_meta:
+        meta = json.load(load_meta)
+        metadata_len = len(meta)
+        name_type = {}
+        for i in range(metadata_len):
+            try:
+                name_label = meta[str(i + 1)][name_header][str(name)]
+                type_label = meta[str(i + 1)][type_header][str(type)]
+            except NameError:
+                print('第{}个样本没有属性{}或{}'.format(i + 1, name, type))
+            else:
+                if name_label in name_type.keys():
+                    if type_label in name_type[name_label]:
+                        continue
+                    else:
+                        name_type[name_label].append(type_label)
+                else:
+                    name_type[name_label] = type_label
+        return name_type
+
+
+# # test read_correlation
+# rc = read_correlation('type', 'load')
+# print(rc)
+
+
 def read_processed_data(type,
-                        offset=15,
+                        offset=0,
+                        direaction=0,
                         each_lenth=1,
                         feature_select=None,
                         Transformer=None):
@@ -37,6 +74,11 @@ def read_processed_data(type,
     first_data = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_data.keys()
     feature_len = 0
+    try:
+        feature_index = features.get_indexer(feature_select)
+        feature_index = feature_index.tolist()
+    except IndexError:
+        print('there is no feature-selected in data')
     if feature_select is None:
         feature_len = len(features)
     else:
@@ -46,21 +88,37 @@ def read_processed_data(type,
             print('feature_select需为所选特征数组')
     x = np.zeros((len(csv_list) * each_lenth, feature_len))
     y = np.zeros((len(csv_list) * each_lenth))
-
     for i, file in enumerate(csv_list):
-        data = pd.read_csv(os.path.join(dir, file), skiprows=offset)
+        if feature_select is None:
+            data = pd.read_csv(os.path.join(dir, file))
+        else:
+            data = pd.read_csv(
+                os.path.join(dir, file),
+                usecols=feature_index,
+            )
         num = file[0:-4]
+        data_len = len(data)
         try:
             label = meta[num]['appliance'][type]
         except TypeError:
             print('没有该属性')
-        for j in range(each_lenth):
-            x[i * each_lenth + j, :] = data.loc[j]
+        if direaction == 0:
+            for j in range(each_lenth):
+                x[i * each_lenth + j, :] = data.loc[offset + j]
             if Transformer is not None:
                 y[i * each_lenth + j] = Transformer[label]
             else:
                 y = y.astype(np.str)
                 y[i * each_lenth + j] = label
+        else:
+            for j in range(each_lenth):
+                x[i * each_lenth + j, :] = data.loc[data_len - offset - j - 1]
+            if Transformer is not None:
+                y[i * each_lenth + j] = Transformer[label]
+            else:
+                y = y.astype(np.str)
+                y[i * each_lenth + j] = label
+
     return x, y
 
 
