@@ -1,7 +1,6 @@
 from features import Features
 import os
 import pandas as pd
-import json
 import numpy as np
 
 path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -13,10 +12,6 @@ feature = Features(sampling_frequency=30000,
                    eval_per=1 / 60,
                    is_wavelet=True,
                    wt_level=6)
-with open(os.path.join(path, 'source/metadata_submetered.json'),
-          'r',
-          encoding='utf8') as load_f:
-    load_dict = json.load(load_f)
 for i, file in enumerate(csv_dir):
     soucre_data = pd.read_csv(os.path.join(path, source_dir, file),
                               names=["I", "U"])
@@ -66,7 +61,5 @@ for i, file in enumerate(csv_dir):
             ],
             axis=1)
 
-    # type = load_dict[file[0:-4]]['appliance']['type']
-    # dataframe.to_csv(process_dir + type + '_' + file, index=True, sep=',')
     dataframe.to_csv(process_dir + file, index=True, sep=',')
     print('正在处理第{}个数据'.format(i))
