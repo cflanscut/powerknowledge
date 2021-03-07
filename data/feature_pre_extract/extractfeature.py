@@ -22,22 +22,23 @@ for i, file in enumerate(csv_dir):
                               names=["I", "U"])
     feature(soucre_data['I'], soucre_data['U'])
 
-    dataframe = pd.concat([
-        pd.DataFrame({'i_mean': feature.data_i_mean_list}),
-        pd.DataFrame({'i_pp': feature.data_i_pp_list}),
-        pd.DataFrame({'i_rms': feature.data_i_rms_list}),
-        pd.DataFrame({'i_wave_factor': feature.data_i_wave_factor_list}),
-        pd.DataFrame({'i_pp_rms': feature.data_i_pp_rms_list}),
-        pd.DataFrame({'i_thd': feature.data_i_thd_list}),
-        pd.DataFrame({'u_mean': feature.data_u_mean_list}),
-        pd.DataFrame({'u_pp': feature.data_u_pp_list}),
-        pd.DataFrame({'u_rms': feature.data_u_rms_list}),
-        pd.DataFrame({'P': feature.P_list}),
-        pd.DataFrame({'Q': feature.Q_list}),
-        pd.DataFrame({'S': feature.S_list}),
-        pd.DataFrame({'P_F': feature.P_F_list}),
-    ],
-                          axis=1)
+    dataframe = pd.concat(
+        [
+            pd.DataFrame({'i_mean': feature.data_i_mean_list}),
+            pd.DataFrame({'i_pp': feature.data_i_pp_list}),
+            pd.DataFrame({'i_rms': feature.data_i_rms_list}),
+            pd.DataFrame({'i_wave_factor': feature.data_i_wave_factor_list}),
+            pd.DataFrame({'i_pp_rms': feature.data_i_pp_rms_list}),
+            pd.DataFrame({'i_thd': feature.data_i_thd_list}),
+            # pd.DataFrame({'u_mean': feature.data_u_mean_list}),
+            # pd.DataFrame({'u_pp': feature.data_u_pp_list}),
+            # pd.DataFrame({'u_rms': feature.data_u_rms_list}),
+            pd.DataFrame({'P': feature.P_list}),
+            pd.DataFrame({'Q': feature.Q_list}),
+            pd.DataFrame({'S': feature.S_list}),
+            pd.DataFrame({'P_F': feature.P_F_list}),
+        ],
+        axis=1)
 
     u_hm = np.array(feature.u_i_fft_list['U_hm']).transpose()
     u_hp = np.array(feature.u_i_fft_list['U_hp']).transpose()
@@ -53,8 +54,17 @@ for i, file in enumerate(csv_dir):
         ihp = pd.DataFrame({'i_hp{}'.format(times): i_hp[times, :]})
         zhm = pd.DataFrame({'z_hm{}'.format(times): z_hm[times, :]})
         zhp = pd.DataFrame({'z_hp{}'.format(times): z_hp[times, :]})
-        dataframe = pd.concat([dataframe, uhm, uhp, ihm, ihp, zhm, zhp],
-                              axis=1)
+        dataframe = pd.concat(
+            [
+                dataframe,
+                # uhm,
+                # uhp,
+                ihm,
+                ihp,
+                zhm,
+                zhp
+            ],
+            axis=1)
 
     # type = load_dict[file[0:-4]]['appliance']['type']
     # dataframe.to_csv(process_dir + type + '_' + file, index=True, sep=',')
