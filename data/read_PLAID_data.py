@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def read_index(type, header='appliance'):
-    with open('data/source/metadata_submetered.json', 'r',
+    with open('data/source/metadata_submetered2.0.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
@@ -32,7 +32,7 @@ def read_correlation(name,
                      type,
                      name_header='appliance',
                      type_header='appliance'):
-    with open('data/source/metadata_submetered.json', 'r',
+    with open('data/source/metadata_submetered2.0.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
@@ -50,23 +50,25 @@ def read_correlation(name,
                     else:
                         name_type[name_label].append(type_label)
                 else:
-                    name_type[name_label] = type_label
+                    name_type[name_label] = []
+                    name_type[name_label].append(type_label)
         return name_type
 
 
 # # test read_correlation
-# rc = read_correlation('type', 'load')
+# rc = read_correlation('type', 'is_cool', type_header='extra label')
 # print(rc)
 
 
 def read_processed_data(type,
+                        type_header='appliance',
                         offset=0,
                         direaction=0,
                         each_lenth=1,
                         feature_select=None,
                         Transformer=None):
     meta = None
-    with open('data/source/metadata_submetered.json', 'r',
+    with open('data/source/metadata_submetered2.0.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
     dir = 'data/source/submetered_process'
@@ -74,11 +76,12 @@ def read_processed_data(type,
     first_data = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_data.keys()
     feature_len = 0
-    try:
-        feature_index = features.get_indexer(feature_select)
-        feature_index = feature_index.tolist()
-    except IndexError:
-        print('there is no feature-selected in data')
+    if feature_select is not None:
+        try:
+            feature_index = features.get_indexer(feature_select)
+            feature_index = feature_index.tolist()
+        except IndexError:
+            print('there is no feature-selected in data')
     if feature_select is None:
         feature_len = len(features)
     else:
@@ -99,7 +102,7 @@ def read_processed_data(type,
         num = file[0:-4]
         data_len = len(data)
         try:
-            label = meta[num]['appliance'][type]
+            label = meta[num][type_header][type]
         except TypeError:
             print('没有该属性')
         if direaction == 0:
@@ -120,6 +123,14 @@ def read_processed_data(type,
                 y[i * each_lenth + j] = label
 
     return x, y
+
+
+def get_feature_name():
+    dir = '/home/chaofan/powerknowledge/data/source/submetered_process'
+    csv_list = os.listdir(dir)
+    first_file = pd.read_csv(os.path.join(dir, csv_list[0]))
+    features = first_file.keys()
+    return list(features)
 
 
 # test
