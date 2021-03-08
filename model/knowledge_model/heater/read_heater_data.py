@@ -6,7 +6,7 @@ from read_PLAID_data import read_processed_data
 
 process_start_time = time.time()
 label_transformer = {'0': 0, '1': 1}
-x, y = read_processed_data('is_light',
+x, y = read_processed_data('is_heat',
                            type_header='extra label',
                            direaction=1,
                            offset=30,
@@ -14,5 +14,5 @@ x, y = read_processed_data('is_light',
 print('finished reading data, cost %2.2f s' %
       (time.time() - process_start_time))
 x = x[:, 1:]
-np.savetxt('model/knowledge_mode/lighter/y_label.csv', y, delimiter=',')
-np.savetxt('model/knowledge_mode/lighter/x.csv', x, delimiter=',')
+np.savetxt('model/knowledge_model/heater/y_label.csv', y, delimiter=',')
+np.savetxt('model/knowledge_model/heater/x.csv', x, delimiter=',')

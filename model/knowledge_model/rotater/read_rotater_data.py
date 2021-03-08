@@ -14,5 +14,5 @@ x, y = read_processed_data('is_rotate',
 print('finished reading data, cost %2.2f s' %
       (time.time() - process_start_time))
 x = x[:, 1:]
-np.savetxt('model/knowledge_mode/rotater/y_label.csv', y, delimiter=',')
-np.savetxt('model/knowledge_mode/rotater/x.csv', x, delimiter=',')
+np.savetxt('model/knowledge_model/rotater/y_label.csv', y, delimiter=',')
+np.savetxt('model/knowledge_model/rotater/x.csv', x, delimiter=',')

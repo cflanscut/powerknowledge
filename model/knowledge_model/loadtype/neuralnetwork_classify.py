@@ -19,7 +19,6 @@ def confusion_matrix(preds, labels, conf_matrix):
 
 process_start_time = time.time()
 label_transformer = {'I': 0, 'R': 1, 'NL': 0}
-# feature_select = ['i_pp_rms', 'P_F', 'i_hp1', 'i_hm3', 'i_hp3', 'z_hp3']
 feature_select = ['i_pp_rms', 'P_F', 'i_hp1', 'i_hm3', 'i_hp3', 'z_hp3']
 x, y = read_processed_data('load',
                            feature_select=feature_select,
@@ -90,6 +89,6 @@ test_result = pd.concat(
         })
     ],
     axis=1)
-test_result.to_csv('model/knowledge_mode/load_test_result.csv',
+test_result.to_csv('model/knowledge_model/load_test_result.csv',
                    index=True,
                    sep=',')
