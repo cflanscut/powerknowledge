@@ -7,10 +7,10 @@ import numpy as np
 power_frequency = 60
 sampling_frequency = 30000
 
-path = 'D:/Desktop/项目/负荷识别部/Plaid/PLAID 2018/submetered/'
-source_dir = 'submetered_new/'
-process_dir = path
-meta_path = path + 'metadata_submetered2.0.json'
+path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+source_dir = 'source/submetered_new'
+process_dir = 'data/source/submetered_process2/'
+meta_path = path + '/source/metadata_submetered2.0.json'
 csv_dir = os.listdir(os.path.join(path, source_dir))
 
 
@@ -31,15 +31,17 @@ feature = Features(sampling_frequency=sampling_frequency,
                    eval_per=1 / 60)
 with open(meta_path) as data_file:
     meta = json.load(data_file)
+load_transformer = {'I': 0, 'R': 1, 'NL': 0}
 for i, file in enumerate(csv_dir):
     soucre_data = pd.read_csv(os.path.join(path, source_dir, file),
                               names=["I", "U"])
     feature(soucre_data['I'], soucre_data['U'])
-    load = get_dic_value_by_k(meta[str(i + 1)], "load")
-    is_heat = get_dic_value_by_k(meta[str(i + 1)], "is_heat")
-    is_cold = get_dic_value_by_k(meta[str(i + 1)], "is_cool")
-    is_light = get_dic_value_by_k(meta[str(i + 1)], "is_light")
-    is_rotate = get_dic_value_by_k(meta[str(i + 1)], "is_rotate")
+    load = get_dic_value_by_k(meta[file[0:-4]], "load")
+    load = load_transformer[load]
+    is_heat = get_dic_value_by_k(meta[file[0:-4]], "is_heat")
+    is_cold = get_dic_value_by_k(meta[file[0:-4]], "is_cool")
+    is_light = get_dic_value_by_k(meta[file[0:-4]], "is_light")
+    is_rotate = get_dic_value_by_k(meta[file[0:-4]], "is_rotate")
     data_len = len(feature.data_i_mean_list)
     dataframe = pd.concat(
         [
