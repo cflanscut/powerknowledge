@@ -5,7 +5,7 @@ import numpy as np
 
 path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 source_dir = 'source/submetered_new'
-process_dir = 'data/source/submetered_process/'
+process_dir = 'data/source/submetered_process2/'
 csv_dir = os.listdir(os.path.join(path, source_dir))
 feature = Features(sampling_frequency=30000,
                    is_fft=True,
@@ -13,6 +13,8 @@ feature = Features(sampling_frequency=30000,
                    is_wavelet=True,
                    wt_level=6)
 for i, file in enumerate(csv_dir):
+    # if file != '1.csv':
+    #     continue
     soucre_data = pd.read_csv(os.path.join(path, source_dir, file),
                               names=["I", "U"])
     feature(soucre_data['I'], soucre_data['U'])
@@ -25,6 +27,7 @@ for i, file in enumerate(csv_dir):
             pd.DataFrame({'i_wave_factor': feature.data_i_wave_factor_list}),
             pd.DataFrame({'i_pp_rms': feature.data_i_pp_rms_list}),
             pd.DataFrame({'i_thd': feature.data_i_thd_list}),
+            pd.DataFrame({'pure_thd': feature.data_pure_thd_list}),
             # pd.DataFrame({'u_mean': feature.data_u_mean_list}),
             # pd.DataFrame({'u_pp': feature.data_u_pp_list}),
             # pd.DataFrame({'u_rms': feature.data_u_rms_list}),
@@ -41,6 +44,9 @@ for i, file in enumerate(csv_dir):
     i_hp = np.array(feature.u_i_fft_list['I_hp']).transpose()
     z_hm = np.array(feature.u_i_fft_list['Z_hm']).transpose()
     z_hp = np.array(feature.u_i_fft_list['Z_hp']).transpose()
+    for t in range(2, u_hm.shape[0]):
+        i_hm[t, :] = np.round(i_hm[t, :] / i_hm[1, :], 5)
+        z_hm[t, :] = np.round(z_hm[t, :] / z_hm[1, :], 5)
 
     for times in range(1, u_hm.shape[0]):
         uhm = pd.DataFrame({'u_hm{}'.format(times): u_hm[times, :]})

@@ -96,6 +96,8 @@ class Features:
         self.__data_u_rms_list = []  # 电压数据有效值列表
         self.__data_u_wave_factor_list = []  # 电压数据波形因数列表
         self.__data_u_pp_rms_list = []  # 电压数据峰均比列表
+        self.__data_u_thd_list = []  # 电压谐波含量
+        self.__data_pure_thd_list = []  # 电流相对电压新增的谐波含量
         self.__P_list = []  # 有功功率列表
         self.__S_list = []  # 视在功率列表
         self.__Q_list = []  # 无功功率列表
@@ -118,6 +120,11 @@ class Features:
                 self.__data_u_mean_list.append(self.__base_feature.mean)
                 self.__data_u_pp_list.append(self.__base_feature.pp)
                 self.__data_u_rms_list.append(self.__base_feature.rms)
+                self.__data_u_thd_list.append(self.__base_feature.thd)
+                self.__data_pure_thd_list.append(
+                    round(
+                        self.__data_i_thd_list[i] / self.__data_u_thd_list[i],
+                        5))
                 self.__expert_feature(self.cut_data_u[i], self.cut_data_i[i])
                 self.__P_list.append(self.__expert_feature.P)
                 self.__S_list.append(self.__expert_feature.S)
@@ -136,6 +143,7 @@ class Features:
                         self.__expert_feature.u_i_fft["Z_hm"])
                     self.__u_i_fft_list["Z_hp"].append(
                         self.__expert_feature.u_i_fft["Z_hp"])
+
         return self
 
     def __cut_data(self, data):
@@ -196,6 +204,11 @@ class Features:
     def data_i_thd_list(self):
         """设置属性只读"""
         return self.__data_i_thd_list
+
+    @property
+    def data_pure_thd_list(self):
+        """设置属性只读"""
+        return self.__data_pure_thd_list
 
     @property
     def data_u(self):
