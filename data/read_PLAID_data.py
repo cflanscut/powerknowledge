@@ -5,7 +5,13 @@ import pandas as pd
 
 
 def read_index(type, header='appliance'):
-    with open('data/source/metadata_submetered2.0.json', 'r',
+    """
+    读取给定type所包含的样本序号。如：读取load里面'R','I','NL'对应的设备序号有哪些
+    :param type: 需要查询的标签名
+    :param header: 对应的json里面的键，默认appliance
+    
+    """
+    with open('data/source/metadata_submetered2.1.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
@@ -24,7 +30,7 @@ def read_index(type, header='appliance'):
 
 
 # test read_index
-# ri = read_index('load')
+# ri = read_index('length', header="instances")
 # print(ri)
 
 
@@ -32,7 +38,8 @@ def read_correlation(name,
                      type,
                      name_header='appliance',
                      type_header='appliance'):
-    with open('data/source/metadata_submetered2.0.json', 'r',
+
+    with open('data/source/metadata_submetered2.1.json', 'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
@@ -55,23 +62,27 @@ def read_correlation(name,
         return name_type
 
 
-# # test read_correlation
-# rc = read_correlation('type', 'is_cool', type_header='extra label')
+# test
+# rc = read_correlation('type', 'status')
 # print(rc)
 
 
 def read_processed_data(type,
                         type_header='appliance',
+                        selected_label=[],
                         offset=0,
                         direaction=0,
                         each_lenth=1,
                         feature_select=None,
-                        Transformer=None):
+                        Transformer=None,
+                        source='submetered_process'):
     meta = None
-    with open('data/source/metadata_submetered2.0.json', 'r',
-              encoding='utf8') as load_meta:
+    with open(
+            '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            'r',
+            encoding='utf8') as load_meta:
         meta = json.load(load_meta)
-    dir = 'data/source/submetered_process'
+    dir = '/home/chaofan/powerknowledge/data/source/' + source
     csv_list = os.listdir(dir)
     first_data = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_data.keys()
@@ -91,6 +102,7 @@ def read_processed_data(type,
             print('feature_select需为所选特征数组')
     x = np.zeros((len(csv_list) * each_lenth, feature_len))
     y = np.zeros((len(csv_list) * each_lenth))
+    index = np.zeros((len(csv_list) * each_lenth, 2))
     for i, file in enumerate(csv_list):
         if feature_select is None:
             data = pd.read_csv(os.path.join(dir, file))
@@ -105,24 +117,35 @@ def read_processed_data(type,
             label = meta[num][type_header][type]
         except TypeError:
             print('没有该属性')
+        if selected_label != []:
+            if label not in selected_label:
+                continue
         if direaction == 0:
             for j in range(each_lenth):
                 x[i * each_lenth + j, :] = data.loc[offset + j]
-            if Transformer is not None:
-                y[i * each_lenth + j] = Transformer[label]
-            else:
-                y = y.astype(np.str)
-                y[i * each_lenth + j] = label
+                index[i * each_lenth + j, 0] = num
+                index[i * each_lenth + j, 1] = offset + j
+                if Transformer is not None:
+                    y[i * each_lenth + j] = Transformer[label]
+                else:
+                    y = y.astype(np.str)
+                    y[i * each_lenth + j] = label
         else:
             for j in range(each_lenth):
                 x[i * each_lenth + j, :] = data.loc[data_len - offset - j - 1]
-            if Transformer is not None:
-                y[i * each_lenth + j] = Transformer[label]
-            else:
-                y = y.astype(np.str)
-                y[i * each_lenth + j] = label
-
-    return x, y
+                index[i * each_lenth + j, 0] = num
+                index[i * each_lenth + j, 1] = data_len - offset - j - 1
+                if Transformer is not None:
+                    y[i * each_lenth + j] = Transformer[label]
+                else:
+                    y = y.astype(np.str)
+                    y[i * each_lenth + j] = label
+    idx = np.argwhere(np.all(x[:, ...] == 0, axis=1))
+    x = np.delete(x, idx, axis=0)
+    y = np.delete(y, idx, axis=0)
+    x = np.nan_to_num(x)
+    x[x > 10000] = 10000
+    return x, y, index
 
 
 def get_feature_name():
@@ -130,12 +153,17 @@ def get_feature_name():
     csv_list = os.listdir(dir)
     first_file = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_file.keys()
-    return list(features)
+    features = list(features)
+    del features[0]
+    return features
 
 
 # test
-# x, y = read_processed_data('load')
-# y_onehot = pd.get_dummies(y)
-# y_onehot.head()
-# print(y_onehot)
-# print(pd.value_counts(y, sort=False))
+# load_transformer = {'I': 0, 'R': 1, 'NL': 0}
+# x_load_train, y_load_train = read_processed_data(
+#     'load',
+#     direaction=1,
+#     offset=10,
+#     each_lenth=10,
+#     Transformer=load_transformer,
+#     source='submetered_process/training')

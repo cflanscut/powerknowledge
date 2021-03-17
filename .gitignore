@@ -1,4 +1,7 @@
-/data
+
 *.pyc
-launch.json
+*.json
 *.csv
+*.m
+*.zip
+*.txt

@@ -14,10 +14,10 @@ def copy_file(file, old_path, new_path):
 type_index = read_index('type')
 train_size = 0.8
 test_size = 0.2
-old_path = 'data/source/submetered_process'
-test_path = 'data/source/submetered_process/testing'
-train_path = 'data/source/submetered_process/training'
-validation_path = 'data/source/submetered_process/validation'
+old_path = 'data/source/submetered_process2'
+test_path = 'data/source/submetered_process2/testing'
+train_path = 'data/source/submetered_process2/training'
+validation_path = 'data/source/submetered_process2/validation'
 for key in type_index:
     each_list = type_index[key]
     each_len = len(each_list)

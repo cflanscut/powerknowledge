@@ -10,6 +10,7 @@ x, y = read_processed_data('is_cool',
                            type_header='extra label',
                            direaction=1,
                            offset=30,
+                           each_lenth=30,
                            Transformer=label_transformer)
 print('finished reading data, cost %2.2f s' %
       (time.time() - process_start_time))
