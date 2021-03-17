@@ -45,12 +45,13 @@ class BaseFeatures:
         """
         data = np.array(data)
         self.__data_source = data  # 原始数据
-        self.__data_mean = self.get_mean(data)  # 数据平均值
-        self.__data_absmean = self.get_absmean(data)  # 数据绝对均值
-        self.__data_pp = self.get_p_p_value(data)  # 数据峰峰值
-        self.__data_rms = self.get_rms(data)  # 数据有效值
-        self.__data_wave_factor = self.get_wave_factor(data)  # 计算波形因数
-        self.__data_pp_rms = self.get_pp_rms(data)  # 计算峰均比
+        self.__data_mean = round(self.get_mean(data), 5)  # 数据平均值
+        self.__data_absmean = round(self.get_absmean(data), 5)  # 数据绝对均值
+        self.__data_pp = round(self.get_p_p_value(data), 5)  # 数据峰峰值
+        self.__data_rms = round(self.get_rms(data), 5)  # 数据有效值
+        self.__data_wave_factor = round(self.get_wave_factor(data),
+                                        5)  # 计算波形因数
+        self.__data_pp_rms = round(self.get_pp_rms(data), 5)  # 计算峰均比
         self.__data_fft = None
         self.__data_wt = None
         self.__data_thd = None
@@ -66,8 +67,10 @@ class BaseFeatures:
                 "hp": (self.fft_to_harmonic(data, self.sampling_frequency,
                                             self.power_frequency))[2]
             }
-            self.__data_thd = np.mean(np.square(
-                (self.__data_fft["hm"])[2:])) / (self.__data_fft["hm"])[1]
+            self.__data_thd = np.sqrt(
+                np.sum(np.square(
+                    (self.__data_fft["hm"])[2:]))) / (self.__data_fft["hm"])[1]
+            self.__data_thd = np.round(self.__data_thd, 5)
         return self
 
     @property
@@ -194,8 +197,9 @@ class BaseFeatures:
         x[0] /= np.sqrt(2)
         freq = np.fft.fftfreq(np.size(data, 0), 1 / sampling_frequency)
         freq = freq[index]
-        hp = np.angle(x) / np.pi * 180
-        hm = np.abs(x) / np.sqrt(2)
+        hp = np.round(np.angle(x) / np.pi * 180, 5)
+        hm = np.round(np.abs(x) / np.sqrt(2), 5)
+
         if hp[0] > 90:
             hp[0] -= 180
             hm[0] = -hm[0]

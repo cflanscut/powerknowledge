@@ -33,10 +33,11 @@ class ExpertFeatures:
         self.data_p = data_u * data_i
         self.__source_data_u = data_u  # 原始电压数据
         self.__source_data_i = data_i  # 原始电流数据
-        self.__P = self.get_P(data_u, data_i)  # 计算有功功率
-        self.__S = self.get_S(data_u, data_i)  # 计算视在功率
-        self.__Q = np.sqrt(np.square(self.S) - np.square(self.P))  # 计算无功功率
-        self.__P_F = self.get_factor(data_u, data_i)  # 计算功率因数
+        self.__P = round(self.get_P(data_u, data_i), 5)  # 计算有功功率
+        self.__S = round(self.get_S(data_u, data_i), 5)  # 计算视在功率
+        self.__Q = round(np.sqrt(np.square(self.S) - np.square(self.P)),
+                         5)  # 计算无功功率
+        self.__P_F = round(self.get_factor(data_u, data_i), 5)  # 计算功率因数
         self.__u_i_fft = None
         if self.__is_fft:
             self.__u_i_fft = self.get_ui_harmonic(data_u, data_i,
@@ -105,29 +106,36 @@ class ExpertFeatures:
             i_data, sampling_frequency, power_frequency)
         # 改为以电压基波为基准，即电压基波相位为0
         for i in range(1, 32):
+            if i_hm[i] < 0:
+                i_hm[i] = -i_hm[i]
+                i_hp[i] += 180
             if i_hm[i] != 0:
                 i_hp[i] -= i * u_hp[1]
             while i_hp[i] < 0:
                 i_hp[i] += 360
-            while i_hp[i] > 360:
+            while i_hp[i] > 0:
                 i_hp[i] -= 360
         for i in range(2, 32):
+            if u_hm[i] < 0:
+                u_hm[i] = -u_hm[i]
+                u_hp[i] += 180
             if u_hm[i] != 0:
                 u_hp[i] -= i * u_hp[1]
             while u_hp[i] < 0:
                 u_hp[i] += 360
-            while u_hp[i] >= 360:
+            while u_hp[i] >= 0:
                 u_hp[i] -= 360
+
         u_hp[1] = 0
         # 将电流对齐到电压操作
         harmonic = {
-            "freq": freq,
-            "U_hm": u_hm,
-            "U_hp": u_hp,
-            "I_hm": i_hm,
-            "I_hp": i_hp,
-            "Z_hm": np.true_divide(u_hm, i_hm),
-            "Z_hp": u_hp - i_hp
+            "freq": np.round(freq, 5),
+            "U_hm": np.round(u_hm, 5),
+            "U_hp": np.round(u_hp, 5),
+            "I_hm": np.round(i_hm, 5),
+            "I_hp": np.round(i_hp, 5),
+            "Z_hm": np.round(np.true_divide(u_hm, i_hm), 5),
+            "Z_hp": np.round(u_hp - i_hp, 5)
         }
         return harmonic
 
