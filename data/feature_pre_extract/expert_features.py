@@ -2,6 +2,7 @@ import numpy as np
 from base_features import BaseFeatures
 
 
+
 class ExpertFeatures:
     """
     专家特征类，用于计算电压电流组合特征
@@ -135,7 +136,7 @@ class ExpertFeatures:
             "I_hm": np.round(i_hm, 5),
             "I_hp": np.round(i_hp, 5),
             "Z_hm": np.round(np.true_divide(u_hm, i_hm), 5),
-            "Z_hp": np.round(u_hp - i_hp, 5)
+            "Z_hp": np.round(np.cos((u_hp - i_hp) / 180 * np.pi), 5)
         }
         return harmonic
 
