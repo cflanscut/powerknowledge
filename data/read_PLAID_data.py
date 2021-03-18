@@ -11,8 +11,10 @@ def read_index(type, header='appliance'):
     :param header: 对应的json里面的键，默认appliance
     
     """
-    with open('data/source/metadata_submetered2.1.json', 'r',
-              encoding='utf8') as load_meta:
+    with open(
+            '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            'r',
+            encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
         label_index = {}
@@ -39,8 +41,10 @@ def read_correlation(name,
                      name_header='appliance',
                      type_header='appliance'):
 
-    with open('data/source/metadata_submetered2.1.json', 'r',
-              encoding='utf8') as load_meta:
+    with open(
+            '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            'r',
+            encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
         name_type = {}
@@ -143,13 +147,14 @@ def read_processed_data(type,
     idx = np.argwhere(np.all(x[:, ...] == 0, axis=1))
     x = np.delete(x, idx, axis=0)
     y = np.delete(y, idx, axis=0)
+    index = np.delete(index, idx, axis=0)
     x = np.nan_to_num(x)
     x[x > 10000] = 10000
     return x, y, index
 
 
 def get_feature_name():
-    dir = '/home/chaofan/powerknowledge/data/source/submetered_process'
+    dir = '/home/chaofan/powerknowledge/data/source/submetered_process2'
     csv_list = os.listdir(dir)
     first_file = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_file.keys()
@@ -158,12 +163,19 @@ def get_feature_name():
     return features
 
 
-# test
-# load_transformer = {'I': 0, 'R': 1, 'NL': 0}
-# x_load_train, y_load_train = read_processed_data(
-#     'load',
-#     direaction=1,
-#     offset=10,
-#     each_lenth=10,
-#     Transformer=load_transformer,
-#     source='submetered_process/training')
+# feature_select = get_feature_name()
+# selected_label = [
+#     'Air Conditioner', 'Blender', 'Coffee maker', 'Fan', 'Fridge', 'Hair Iron',
+#     'Hairdryer', 'Heater', 'Incandescent Light Bulb', 'Microwave',
+#     'Soldering Iron', 'Vacuum', 'Washing Machine'
+# ]
+# for sl in selected_label:
+#     x_t, y_label, t_index = read_processed_data(
+#         'type',
+#         selected_label=[sl],
+#         direaction=1,
+#         offset=1,
+#         each_lenth=1,
+#         feature_select=feature_select,
+#         source='submetered_process2/training')
+#     np.savetxt('/home/chaofan/powerknowledge/model/knowledge_model1.1/'+sl + '.csv', x_t, delimiter=',')
