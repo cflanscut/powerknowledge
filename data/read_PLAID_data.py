@@ -163,19 +163,33 @@ def get_feature_name():
     return features
 
 
-# feature_select = get_feature_name()
-# selected_label = [
-#     'Air Conditioner', 'Blender', 'Coffee maker', 'Fan', 'Fridge', 'Hair Iron',
-#     'Hairdryer', 'Heater', 'Incandescent Light Bulb', 'Microwave',
-#     'Soldering Iron', 'Vacuum', 'Washing Machine'
-# ]
-# for sl in selected_label:
-#     x_t, y_label, t_index = read_processed_data(
-#         'type',
-#         selected_label=[sl],
-#         direaction=1,
-#         offset=1,
-#         each_lenth=1,
-#         feature_select=feature_select,
-#         source='submetered_process2/training')
-#     np.savetxt('/home/chaofan/powerknowledge/model/knowledge_model1.1/'+sl + '.csv', x_t, delimiter=',')
+def read_source_data(file_dir, length='default', offset=0):
+    soucre_data = pd.read_csv(file_dir, names=["I", "U"])
+    if length == 'default':
+        length = soucre_data.shape[0] - offset - 1
+    return soucre_data['U'][offset:offset +
+                            length], soucre_data['I'][offset:offset + length]
+
+
+def find_temp_start(guide_feature, threshold):
+    dir = '/home/chaofan/powerknowledge/data/source/submetered_process2.1'
+    start_record = {}
+    csv_list = os.listdir(dir)
+    for i, file in enumerate(csv_list):
+        if '.csv' not in file:
+            continue
+        value0 = 0
+        data = pd.read_csv(os.path.join(dir, file))
+        data = data[guide_feature]
+        for j, value in enumerate(data):
+            if abs(value - value0) >= threshold:
+                start_record[file] = j
+                break
+            else:
+                value0 = value
+    return start_record
+
+
+# test
+t = find_temp_start('P', 5)
+print(t)
