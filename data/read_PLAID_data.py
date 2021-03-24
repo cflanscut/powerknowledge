@@ -9,7 +9,6 @@ def read_index(type, header='appliance'):
     读取给定type所包含的样本序号。如：读取load里面'R','I','NL'对应的设备序号有哪些
     :param type: 需要查询的标签名
     :param header: 对应的json里面的键，默认appliance
-    
     """
     with open(
             '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
@@ -32,7 +31,7 @@ def read_index(type, header='appliance'):
 
 
 # test read_index
-# ri = read_index('length', header="instances")
+# ri = read_index('type', header="appliance")
 # print(ri)
 
 
@@ -67,7 +66,7 @@ def read_correlation(name,
 
 
 # test
-# rc = read_correlation('type', 'status')
+# rc = read_correlation('type', 'brand')
 # print(rc)
 
 
@@ -190,6 +189,38 @@ def find_temp_start(guide_feature, threshold):
     return start_record
 
 
+# # test
+# t = find_temp_start('P', 5)
+def find_temp_start_pricisely(guide_feature, threshold):
+    source_dir = 'data/source/submetered_new/'
+    start_index = find_temp_start(guide_feature, threshold)
+    start_record = {}
+    for file, start_period in start_index.items():
+        if start_period > 0:
+            start_period -= 1
+            file_dir = source_dir + file
+            Voltage, Current = read_source_data(file_dir,
+                                                offset=start_period * 500,
+                                                length=1000)
+            start_i = 0
+            value0 = 0
+            consecutive_count = 0
+            sign = 0
+            for i, value in enumerate(Current):
+                diff = value - value0
+                if np.sign(diff) == sign and sign != 0:
+                    if consecutive_count == 0:
+                        start_i = start_period * 500 + i
+                    consecutive_count += 1
+                else:
+                    consecutive_count = 0
+                if consecutive_count > 10:
+                    start_record[file] = start_i
+                    break
+                value0 = value
+                sign = np.sign(diff)
+    return start_record
+
+
 # test
-t = find_temp_start('P', 5)
-print(t)
+# t = find_temp_start_pricisely('P', 5)
