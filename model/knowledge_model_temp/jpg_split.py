@@ -18,17 +18,15 @@ def move_file(file, old_path, new_path):
 
 
 type_index = read_index('type')
-old_path = 'model/knowledge_model_temp/jpg'
-new_path = 'model/knowledge_model_temp/jpg/total'
+path = 'model/knowledge_model_temp/jpg'
 
 for key in type_index:
     each_list = type_index[key]
     for i, index in enumerate(each_list):
         file_name = str(index) + '.jpg'
-        jpg_list = os.listdir(old_path)
+        jpg_list = os.listdir(path + '/total')
         if file_name not in jpg_list:
             continue
-        copy_file(file_name, old_path, new_path)
-        move_file(file_name, old_path, old_path + '/' + key)
+        copy_file(file_name, path + '/total', path + '/' + key)
 
 print('finished spliting!')
