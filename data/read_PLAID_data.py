@@ -2,6 +2,8 @@ import json
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 
 
 def read_index(type, header='appliance'):
@@ -166,8 +168,8 @@ def read_source_data(file_dir, length='default', offset=0):
     soucre_data = pd.read_csv(file_dir, names=["I", "U"])
     if length == 'default':
         length = soucre_data.shape[0] - offset - 1
-    return soucre_data['U'][offset:offset +
-                            length], soucre_data['I'][offset:offset + length]
+    return soucre_data['U'][offset:offset + length -
+                            1], soucre_data['I'][offset:offset + length - 1]
 
 
 def find_temp_start(guide_feature, threshold):
@@ -214,7 +216,7 @@ def find_temp_start_pricisely(guide_feature, threshold):
                     consecutive_count += 1
                 else:
                     consecutive_count = 0
-                if consecutive_count > 10:
+                if consecutive_count > 5:
                     start_record[file] = start_i
                     break
                 value0 = value
@@ -224,3 +226,32 @@ def find_temp_start_pricisely(guide_feature, threshold):
 
 # test
 # t = find_temp_start_pricisely('P', 5)
+def bar(pos):
+    pos = int(pos)
+    bar.ax.clear()
+    if pos + bar.N > len(bar.x):
+        n = len(bar.x) - pos
+    else:
+        n = bar.N
+    X = bar.x[pos:pos + n]
+    Y = bar.y[pos:pos + n]
+    bar.ax.plot(X, Y)  # 相当于每次触发重新画
+
+    bar.ax.xaxis.set_ticks([])
+    bar.ax.yaxis.set_ticks([])
+
+
+def slider_plot(data):
+    fig, bar.ax = plt.subplots(figsize=(10, 6))
+    bar.x = np.linspace(0, len(data) - 1, len(data))
+    bar.y = np.array(data)
+    bar.N = 3000
+    barpos = plt.axes([0.18, 0.05, 0.55, 0.03],
+                      facecolor="skyblue")  # [左下角在画板的位置（横坐标纵坐标），图大小（长宽）]
+    slider = Slider(barpos, 'Barpos', 0, len(bar.x) - bar.N,
+                    valinit=0)  # barpos放置滑条容器，用axes实例；0最小值；后面接着最大值；valinit初始值
+    slider.on_changed(
+        bar)  # on_changed是滑动条方法，用于绑定滑动条值改变的事件，就是滑动条改变了就调用这个函数，会自动传滑动条当前值进去
+    bar(0)
+    plt.show()
+    plt.close()
