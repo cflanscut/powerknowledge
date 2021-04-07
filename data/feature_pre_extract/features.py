@@ -17,6 +17,7 @@ class Features:
     """
     def __init__(self,
                  sampling_frequency,
+                 power_frequency=50,
                  eval_per=0.02,
                  use_periods=1,
                  is_fft=False,
@@ -34,7 +35,7 @@ class Features:
         :param wt_name: 小波名称，默认为db3，可修改
         """
         self.sampling_frequency = sampling_frequency
-        self.power_frequency = 60  # 电源频率
+        self.power_frequency = power_frequency  # 电源频率
         self.num_per_periods = int(self.sampling_frequency /
                                    self.power_frequency)
         self.is_fft = is_fft
@@ -49,8 +50,9 @@ class Features:
         self.eval_per = eval_per
         self.use_periods = use_periods
         self.__base_feature = BaseFeatures(is_fft, False, sampling_frequency,
-                                           wt_level, wt_name)
-        self.__expert_feature = ExpertFeatures(is_fft, sampling_frequency)
+                                           power_frequency, wt_level, wt_name)
+        self.__expert_feature = ExpertFeatures(is_fft, sampling_frequency,
+                                               power_frequency)
 
     def __call__(self, data_i, data_u=None):
         """获取各种特征序列

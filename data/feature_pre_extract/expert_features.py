@@ -2,18 +2,17 @@ import numpy as np
 from base_features import BaseFeatures
 
 
-
 class ExpertFeatures:
     """
     专家特征类，用于计算电压电流组合特征
     """
-    def __init__(self, is_fft=False, sampling_frequency=0):
+    def __init__(self, is_fft=False, sampling_frequency=0, power_frequency=50):
         """ExpertFeatures类的初始化
 
         :param is_fft: 是否进行傅里叶计算，True时结果在属性data_fft中
         :param sampling_frequency: 采样频率，当要进行傅里叶变换即is_fft为True时需指定
         """
-        self.power_frequency = 60  # 电源频率
+        self.power_frequency = power_frequency  # 电源频率
         self.__is_fft = is_fft
         if self.__is_fft:
             if sampling_frequency == 0:

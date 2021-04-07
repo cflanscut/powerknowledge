@@ -10,6 +10,7 @@ class BaseFeatures:
                  is_fft=False,
                  is_wavelet=False,
                  sampling_frequency=0,
+                 power_frequency=50,
                  wt_level=0,
                  wt_name='db3'):
         """FeaturesPar类的初始化
@@ -20,7 +21,7 @@ class BaseFeatures:
         :param wt_level: 小波变换层数，当要进行小波变换时需指定
         :param wt_name: 小波名称，默认为db3，可修改
         """
-        self.power_frequency = 60  # 电源频率
+        self.power_frequency = power_frequency  # 电源频率
         self.__is_fft = is_fft
         self.__is_wavelet = is_wavelet
         if self.__is_fft:
