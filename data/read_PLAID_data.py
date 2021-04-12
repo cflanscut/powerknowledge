@@ -80,10 +80,12 @@ def read_processed_data(type,
                         each_lenth=1,
                         feature_select=None,
                         Transformer=None,
-                        source='submetered_process'):
+                        source='submetered_process',
+                        source_json='/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json'):
     meta = None
     with open(
-            '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            # '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            source_json,
             'r',
             encoding='utf8') as load_meta:
         meta = json.load(load_meta)
@@ -139,7 +141,7 @@ def read_processed_data(type,
             for j in range(each_lenth):
                 x[i * each_lenth + j, :] = data.loc[data_len - offset - j - 1]
                 index[i * each_lenth + j, 0] = num
-                index[i * each_lenth + j, 1] = data_len - offset - j - 1
+                index[i * each_lenth + j, 1] = data_len - offset - j + 1
                 if Transformer is not None:
                     y[i * each_lenth + j] = Transformer[label]
                 else:
@@ -154,8 +156,8 @@ def read_processed_data(type,
     return x, y, index
 
 
-def get_feature_name():
-    dir = '/home/chaofan/powerknowledge/data/source/submetered_process2'
+def get_feature_name(
+        dir='/home/chaofan/powerknowledge/data/source/submetered_process2'):
     csv_list = os.listdir(dir)
     first_file = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_file.keys()
