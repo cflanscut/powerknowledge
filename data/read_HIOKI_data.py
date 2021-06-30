@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
@@ -20,6 +21,103 @@ def read_source_data(file_dir, length='default', offset=0):
 # Temp_U, Temp_I = read_source_data(
 #     'data/source/HIOKI/source/DDCsx_20201126_170239.csv', length=800)
 # print()
+
+
+def read_processed_data(
+    type,
+    type_header='appliance',
+    selected_label=[],
+    offset=0,
+    direaction=0,
+    each_lenth=1,
+    feature_select=None,
+    Transformer=None,
+    source='/HIOKI_xinpei/process/total',
+    source_json='/home/chaofan/powerknowledge/data/source/HIOKI_xinpei/label.json'
+):
+    meta = None
+    with open(
+            # '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
+            source_json,
+            'r',
+            encoding='utf8') as load_meta:
+        meta = json.load(load_meta)
+    dir = '/home/chaofan/powerknowledge/data/source' + source
+    csv_list = os.listdir(dir)
+    first_data = pd.read_csv(os.path.join(dir, csv_list[0]))
+    features = first_data.keys()
+    feature_len = 0
+    if feature_select is not None:
+        try:
+            feature_index = features.get_indexer(feature_select)
+            feature_index = feature_index.tolist()
+        except IndexError:
+            print('there is no feature-selected in data')
+    if feature_select is None:
+        feature_len = len(features)
+    else:
+        try:
+            feature_len = len(feature_select)
+        except TypeError:
+            print('feature_select需为所选特征数组')
+    x = np.zeros((len(csv_list) * each_lenth, feature_len))
+    y = np.zeros((len(csv_list) * each_lenth))
+    for i, file in enumerate(csv_list):
+        if feature_select is None:
+            data = pd.read_csv(os.path.join(dir, file))
+        else:
+            data = pd.read_csv(
+                os.path.join(dir, file),
+                usecols=feature_index,
+            )
+        fragment = file.split('_')[:-2]
+        for part, txt in enumerate(fragment):
+            if part == 0:
+                key_name = txt
+            else:
+                key_name = key_name + '_' + txt
+        data_len = len(data)
+        try:
+            label = meta[key_name][type_header][type]
+        except TypeError:
+            print('没有该属性')
+        if selected_label != []:
+            if label not in selected_label:
+                continue
+
+        if direaction == 0:
+            for j in range(each_lenth):
+                x[i * each_lenth + j, :] = data.loc[offset + j]
+
+                if Transformer is not None:
+                    y[i * each_lenth + j] = Transformer[label]
+                else:
+                    y = y.astype(np.str)
+                    y[i * each_lenth + j] = label
+        else:
+            for j in range(each_lenth):
+                x[i * each_lenth + j, :] = data.loc[data_len - offset - j - 1]
+
+                if Transformer is not None:
+                    y[i * each_lenth + j] = Transformer[label]
+                else:
+                    y = y.astype(np.str)
+                    y[i * each_lenth + j] = label
+    idx = np.argwhere(np.all(x[:, ...] == 0, axis=1))
+    x = np.delete(x, idx, axis=0)
+    y = np.delete(y, idx, axis=0)
+    x = np.nan_to_num(x)
+    x[x > 10000] = 10000
+    x = np.delete(x, [0], axis=1)
+    return x, y
+
+
+# test
+selected_label = ['Fan']
+test_x, test_y = read_processed_data('type',
+                                     selected_label=selected_label,
+                                     direaction=1,
+                                     each_lenth=1)
 
 
 def find_temp_start(guide_feature, threshold):
@@ -161,5 +259,5 @@ def find_stable_start(guide_feature,
     return start_record
 
 
-record = find_stable_start('P', 5)
-print()
+# record = find_stable_start('P', 5)
+# print()

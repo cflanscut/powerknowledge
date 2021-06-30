@@ -3,14 +3,14 @@ import os
 import pandas as pd
 import numpy as np
 
-source_dir = 'data/source/submetered_new/'  # 修改
-process_dir = 'data/source/submetered_zengj/total/'
+source_dir = 'data/source/HIOKI_xinpei/raw/'  # 修改
+process_dir = 'data/source/HIOKI_xinpei/process/total/'
 csv_dir = os.listdir(source_dir)
 feature = Features(
-    sampling_frequency=30000,  # 修改
-    power_frequency=60,
+    sampling_frequency=20000,  # 修改
+    power_frequency=50,
     is_fft=True,
-    eval_per=1 / 60,  # 修改
+    eval_per=1 / 50,  # 修改
     is_wavelet=True,
     wt_level=6)
 for i, file in enumerate(csv_dir):
@@ -18,10 +18,10 @@ for i, file in enumerate(csv_dir):
     #     continue
     if '.csv' not in file:
         continue
-    soucre_data = pd.read_csv(
-        os.path.join(source_dir, file),
-        names=["I", "U"],
-    )  # 修改
+    soucre_data = pd.read_csv(os.path.join(source_dir, file),
+                              names=["U", "I"],
+                              skiprows=9,
+                              usecols=[1, 2])  # 修改
 
     feature(soucre_data['I'], soucre_data['U'])
 
@@ -63,12 +63,14 @@ for i, file in enumerate(csv_dir):
 
     i_double = np.round(
         np.sqrt(i_hm[4, :]**2 + i_hm[6, :]**2 + i_hm[8, :]**2 +
-                i_hm[10, :]**2), 5)
+                i_hm[10, :]**2), 5)  # 偶次谐波聚合值
     i_triple = np.round(
-        np.sqrt(i_hm[9, :]**2 + i_hm[12, :]**2 + i_hm[15, :]**2), 5)
+        np.sqrt(i_hm[9, :]**2 + i_hm[12, :]**2 + i_hm[15, :]**2),
+        5)  # 三倍次谐波聚合值
     i_prime = np.round(
         np.sqrt(i_hm[11, :]**2 + i_hm[13, :]**2 + i_hm[17, :]**2 +
-                i_hm[19, :]**2 + i_hm[23, :]**2 + i_hm[25, :]**2), 5)
+                i_hm[19, :]**2 + i_hm[23, :]**2 + i_hm[25, :]**2),
+        5)  # 质数次谐波聚合值
     zengj_df = pd.DataFrame({
         'i_double': i_double,
         'i_triple': i_triple,

@@ -3,20 +3,26 @@ import os
 import pandas as pd
 import numpy as np
 
-path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-source_dir = 'source/submetered_new'
-process_dir = 'data/source/submetered_process2/'
-csv_dir = os.listdir(os.path.join(path, source_dir))
-feature = Features(sampling_frequency=30000,
-                   is_fft=True,
-                   eval_per=1 / 60,
-                   is_wavelet=True,
-                   wt_level=6)
+source_dir = 'data/source/HIOKI_xinpei/raw'  # 修改
+process_dir = 'data/source/HIOKI_xinpei/process/total'
+csv_dir = os.listdir(source_dir)
+feature = Features(
+    sampling_frequency=20000,  # 修改
+    power_frequency=50,
+    is_fft=True,
+    eval_per=1 / 50,  # 修改
+    is_wavelet=True,
+    wt_level=6)
 for i, file in enumerate(csv_dir):
     # if file != '1.csv':
     #     continue
-    soucre_data = pd.read_csv(os.path.join(path, source_dir, file),
-                              names=["I", "U"])
+    if '.csv' not in file:
+        continue
+    soucre_data = pd.read_csv(os.path.join(source_dir, file),
+                              names=["U", "I"],
+                              skiprows=9,
+                              usecols=[1, 2])  # 修改
+
     feature(soucre_data['I'], soucre_data['U'])
 
     dataframe = pd.concat(
@@ -45,8 +51,8 @@ for i, file in enumerate(csv_dir):
     z_hm = np.array(feature.u_i_fft_list['Z_hm']).transpose()
     z_hp = np.array(feature.u_i_fft_list['Z_hp']).transpose()
     for t in range(2, u_hm.shape[0]):
-        i_hm[t, :] = np.round(i_hm[t, :] / i_hm[1, :], 5)
-        z_hm[t, :] = np.round(z_hm[t, :] / z_hm[1, :], 5)
+        i_hm[t, :] = np.round(i_hm[t, :] / (i_hm[1, :]+0.000001), 5)
+        z_hm[t, :] = np.round(z_hm[t, :] / (z_hm[1, :]+0.000001), 5)
 
     for times in range(1, u_hm.shape[0]):
         uhm = pd.DataFrame({'u_hm{}'.format(times): u_hm[times, :]})
