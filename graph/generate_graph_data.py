@@ -148,15 +148,15 @@ def count_node(node_count_dict, node_list):  # node为字符串型
 def save_graph_in_txt(node_counts, edge_counts, graph_label) -> None:
 
     with open(
-            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_node_labels.txt",
+            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_node_labels.txt",
             'r') as file_node_labels:
         base_node_num = len(file_node_labels.readlines())
     with open(
-            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_graph_label.txt",
+            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_graph_labels.txt",
             'r') as file_graph_label:
         base_graph_num = len(file_graph_label.readlines())
     with open(
-            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_graph_label.txt",
+            "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_graph_labels.txt",
             'a') as file_graph_label:
         file_graph_label.write(str(graph_label) + '\n')
 
@@ -164,16 +164,16 @@ def save_graph_in_txt(node_counts, edge_counts, graph_label) -> None:
     index_convert = {}
     for key in node_counts.keys():  # key为节点类型，变成label；value为次数，变成attribute
         with open(
-                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_node_labels.txt",
+                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_node_labels.txt",
                 'a') as file_node_labels:
             file_node_labels.write(str(key) + '\n')  #指示当前节点的标签（特征+中心所对应的编号）
         with open(
-                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_node_attributes.txt",
+                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_node_attributes.txt",
                 'a') as file_node_attributes:
             file_node_attributes.write(str(node_counts[key]) +
                                        '\n')  #指示当前节点的特征
         with open(
-                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_graph_indicator.txt",
+                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_graph_indicator.txt",
                 'a') as file_graph_indicator:
             file_graph_indicator.write(str(base_graph_num + 1) +
                                        '\n')  #指示当前节点属于第几个graph
@@ -183,16 +183,27 @@ def save_graph_in_txt(node_counts, edge_counts, graph_label) -> None:
         key_str = key.split(',')
         node_a = index_convert[key_str[0]]
         node_b = index_convert[key_str[1]]
-        with open("/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_A.txt",
-                  'a') as file_A:
-            file_A.write(node_a + ',' + node_b + '\n')
         with open(
-                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG_edge_attributes.txt",
+                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_A.txt",
+                'a') as file_A:
+            file_A.write(node_b + ',' + node_a + '\n')  # 通用数据集都是第二列顺序排列的
+        with open(
+                "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_edge_attributes.txt",
                 'a') as file_edge_attributes:
             file_edge_attributes.write(str(edge_counts[key]) + '\n')
 
 
 file_count = 1
+txt_list = [
+    'A', 'edge_attributes', 'graph_indicator', 'graph_labels',
+    'node_attributes', 'node_labels'
+]
+dir = '/home/chaofan/powerknowledge/graph/'
+dataset_name = 'PLAIDG'
+for txt in txt_list:
+    url = dir + dataset_name + '/' + dataset_name + '/' + 'raw/' + dataset_name + '_' + txt + '.txt'
+    open(url, 'w').close()
+
 for i, yi_cluster in enumerate(y_cluster):
     # if i < 100:
     #     continue  # 跳过100个数？
