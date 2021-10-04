@@ -105,8 +105,8 @@ for feat, cluster in product(range(feature_lens),
                              range(n_cluster)):  #把所有特征的聚类值转化为顺序排列的整数
     node_num_transform['%03d,%03d' % (feat, cluster)] = str(
         tmp)  #转为用字符串，方便后续存储
-    node_label_transform[tmp] = np.array([feat, cluster
-                                          ])  # 暂时用不到拆分的，直接用tmp来代表特征和聚类中心
+    node_label_transform[str(tmp)] = np.array([feat, cluster
+                                               ])  # 暂时用不到拆分的，直接用tmp来代表特征和聚类中心
     tmp += 1
 del tmp
 
@@ -163,21 +163,25 @@ def save_graph_in_txt(node_counts, edge_counts, graph_label) -> None:
     tmp = 1
     index_convert = {}
     for key in node_counts.keys():  # key为节点类型，变成label；value为次数，变成attribute
+        feat = node_label_transform[key][0]
+        cluster = node_label_transform[key][1]
         with open(
                 "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_node_labels.txt",
                 'a') as file_node_labels:
-            file_node_labels.write(str(key) + '\n')  #指示当前节点的标签（特征+中心所对应的编号）
+            # file_node_labels.write(str(key) + '\n')  #指示当前节点的标签（特征+中心所对应的编号）
+            file_node_labels.write(str(feat) + '\n')
         with open(
                 "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_node_attributes.txt",
                 'a') as file_node_attributes:
+            file_node_attributes.write(str(cluster) + ',')
             file_node_attributes.write(str(node_counts[key]) +
-                                       '\n')  #指示当前节点的特征
+                                       '\n')  # 指示当前节点的特征
         with open(
                 "/home/chaofan/powerknowledge/graph/PLAIDG/PLAIDG/raw/PLAIDG_graph_indicator.txt",
                 'a') as file_graph_indicator:
             file_graph_indicator.write(str(base_graph_num + 1) +
-                                       '\n')  #指示当前节点属于第几个graph
-        index_convert[key] = str(base_node_num + tmp)  #用于描述A矩阵，重新定义边的节点编号
+                                       '\n')  # 指示当前节点属于第几个graph
+        index_convert[key] = str(base_node_num + tmp)  # 用于描述A矩阵，重新定义边的节点编号
         tmp += 1
     for key in edge_counts.keys():  # key为节点对，变成A阵；value为次数，变成attribute
         key_str = key.split(',')

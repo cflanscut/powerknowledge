@@ -9,7 +9,7 @@ sampling_frequency = 30000
 
 path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 source_dir = 'source/submetered_new'
-process_dir = 'data/source/submetered_process2/'
+process_dir = 'data/source/submetered_process2.1/'
 meta_path = path + '/source/metadata_submetered2.0.json'
 csv_dir = os.listdir(os.path.join(path, source_dir))
 

@@ -1,4 +1,3 @@
-
 from torch_geometric.data import InMemoryDataset
 import os.path as osp
 import torch
@@ -43,7 +42,7 @@ class PLAIDDataset(InMemoryDataset):
         self
     ):  #A list of files in the raw_dir which needs to be found in order to skip the download.
         names = [
-            'A', 'edge_attributes', 'graph_indicator', 'graph_label',
+            'A', 'edge_attributes', 'graph_indicator', 'graph_labels',
             'node_attributes', 'node_labels'
         ]
         return ['{}_{}.txt'.format(self.name, name) for name in names]
@@ -54,11 +53,9 @@ class PLAIDDataset(InMemoryDataset):
     ):  #A list of files in the processed_dir which needs to be found in order to skip the processing.
         return 'data.pt'
 
-    @property
     def download(self):
         print('This dataset is not yet public')
 
-    @property
     def process(self):
         self.data, self.slices = read_tu_data(self.raw_dir, self.name)
 
