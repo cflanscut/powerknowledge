@@ -8,8 +8,8 @@ from collections import Counter
 from itertools import product
 # %%
 # 读取数据
-sys.path.append('/home/chaofan/powerknowledge/data')
-from read_PLAID_data import read_processed_data
+sys.path.append('..')
+from data.read_PLAID_data import read_processed_data
 
 start_reading_time = time.time()
 

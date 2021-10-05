@@ -4,8 +4,9 @@ from torch_geometric.nn import GCNConv
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
 import numpy as np
-
-datasets = PLAIDDataset(root='~/powerknowledge/graph/PLAIDG',
+import os.path as osp
+path = osp.join(osp.abspath('.'), 'graph', 'PLAIDG')
+datasets = PLAIDDataset(root=path,
                         name='PLAIDG',
                         use_node_attr=True,
                         use_edge_attr=True)

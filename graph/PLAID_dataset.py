@@ -14,10 +14,8 @@ class PLAIDDataset(InMemoryDataset):
                  use_node_attr=False,
                  use_edge_attr=False):
         self.name = name
-        super(PLAIDDataset, self).__init__(root=root,
-                                           transform=transform,
-                                           pre_transform=pre_transform,
-                                           pre_filter=pre_filter)  # 预处理在这里实现
+        super(PLAIDDataset, self).__init__(root, transform, pre_transform,
+                                           pre_filter)  # 预处理在这里实现
         self.data, self.slices = torch.load(
             self.processed_paths[0])  # 读取处理好的数据
         if self.data.x is not None and not use_node_attr:  #若需要node_attr，则跳过这个判断
