@@ -1,6 +1,16 @@
+'''
+Author: LanChaofan cflanscut@163.com
+Date: 2021-10-05 22:02:25
+LastEditors: LanChaofan cflanscut@163.com
+LastEditTime: 2022-09-26 20:51:24
+Description: 
+
+Copyright (c) 2022 by lanchaofan, All Rights Reserved.
+'''
 import os.path as osp
 import numpy as np
-file_dir = osp.join(osp.abspath(''), 'graph', 'PLAIDG', 'PLAIDG', 'raw')
+file_dir = osp.join(osp.abspath(''), 'graph', 'PLAIDG_single', 'PLAIDG_single',
+                    'raw')
 with open(osp.join(file_dir,
                    'PLAIDG_graph_indicator.txt')) as PLAIDG_graph_indicator:
     graph_indicator = PLAIDG_graph_indicator.read().split('\n')[:-1]
@@ -16,13 +26,15 @@ with open(osp.join(file_dir,
 open(osp.join(file_dir, 'table_data.txt'), 'w').close()
 
 count = 0
+times_threshold = 9  # 20*0.3
+
 for i in range(len(node_slice) - 1):
     node_list = {str(i): [-1] for i in range(30)}
     label = graph_labels[i]
     for j in range(node_slice[i], node_slice[i + 1]):
         feature = node_labels[j]
         times = int(node_attributes[j].split(',')[1])
-        if times > 8:
+        if times > times_threshold:
             node_list[feature].append(int(node_attributes[j].split(',')[0]))
 
     with open(osp.join(file_dir, 'table_data.txt'), 'a') as table_data:
@@ -36,7 +48,7 @@ for i in range(len(node_slice) - 1):
             if len(v) == 2:
                 single_idx.append(k)
             # elif len(v) >= 2:
-            else:  #-1的放这里
+            else:  # -1的放这里
                 multi_idx.append(k)
         new_data = np.zeros((total_len, len(node_list.keys()) + 1))
         count += total_len

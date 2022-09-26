@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 import os.path as osp
 
+source_dir = osp.join(osp.abspath(''), 'data', 'source')
+
 
 def read_index(type, header='appliance'):
     """
@@ -13,10 +15,9 @@ def read_index(type, header='appliance'):
     :param type: 需要查询的标签名
     :param header: 对应的json里面的键，默认appliance
     """
-    with open(
-            '/home/chaofan/powerknowledge/data/source/metadata_submetered2.1.json',
-            'r',
-            encoding='utf8') as load_meta:
+    with open(osp.join(source_dir, 'metadata_submetered2.1.json'),
+              'r',
+              encoding='utf8') as load_meta:
         meta = json.load(load_meta)
         metadata_len = len(meta)
         label_index = {}
@@ -43,8 +44,7 @@ def read_correlation(name,
                      name_header='appliance',
                      type_header='appliance'):
 
-    with open(osp.join(osp.abspath(''), 'source',
-                       'metadata_submetered2.1.json'),
+    with open(osp.join(source_dir, 'metadata_submetered2.1.json'),
               'r',
               encoding='utf8') as load_meta:
         meta = json.load(load_meta)
@@ -82,14 +82,15 @@ def read_processed_data(type,
                         feature_select=None,
                         Transformer=None,
                         source='submetered_process',
-                        source_json=osp.join(osp.abspath(''), 'data', 'source',
-                                             'metadata_submetered2.1.json')):
+                        json_name='metadata_submetered2.1.json'):
+    file_dir = osp.join(source_dir, source)
+    json_dir = osp.join(source_dir, json_name)
     meta = None
-    with open(source_json, 'r', encoding='utf8') as load_meta:
+    with open(json_dir, 'r', encoding='utf8') as load_meta:
         meta = json.load(load_meta)
-    dir = osp.join(osp.abspath(''), 'data', 'source', source)
-    csv_list = os.listdir(dir)
-    first_data = pd.read_csv(os.path.join(dir, csv_list[0]))
+
+    csv_list = os.listdir(file_dir)
+    first_data = pd.read_csv(os.path.join(file_dir, csv_list[0]))
     features = first_data.keys()
     feature_len = 0
     if feature_select is not None:
@@ -110,10 +111,10 @@ def read_processed_data(type,
     index = np.zeros((len(csv_list) * each_lenth, 2))
     for i, file in enumerate(csv_list):
         if feature_select is None:
-            data = pd.read_csv(os.path.join(dir, file))
+            data = pd.read_csv(os.path.join(file_dir, file))
         else:
             data = pd.read_csv(
-                os.path.join(dir, file),
+                os.path.join(file_dir, file),
                 usecols=feature_index,
             )
         num = file[0:-4]
@@ -154,8 +155,8 @@ def read_processed_data(type,
     return x, y, index
 
 
-def get_feature_name(dir=osp.join(osp.abspath(''), 'data', 'source',
-                                  'submetered_process2')):
+def get_feature_name(dir='submetered_process2'):
+    dir = osp.join(source_dir, dir)
     csv_list = os.listdir(dir)
     first_file = pd.read_csv(os.path.join(dir, csv_list[0]))
     features = first_file.keys()
@@ -172,8 +173,8 @@ def read_source_data(file_dir, length='default', offset=0):
                             1], soucre_data['I'][offset:offset + length - 1]
 
 
-def find_temp_start(guide_feature, threshold):
-    dir = osp.join(osp.abspath(''), 'data', 'source', 'submetered_process2.1')
+def find_temp_start(guide_feature, threshold, dir='submetered_process2.1'):
+    dir = osp.join(source_dir, dir)
     start_record = {}
     csv_list = os.listdir(dir)
     for i, file in enumerate(csv_list):

@@ -42,7 +42,7 @@ class DGCNN(torch.nn.Module):
         num_node_feats,
         num_edge_feats,
         num_class,
-        latent_dim=[32, 32, 32, 1],
+        latent_dim=[32, 1],
         k=20,
         conv1d_channels=[16, 32],
         conv1d_kws=[0, 5],  # 0是待定的意思
@@ -63,8 +63,8 @@ class DGCNN(torch.nn.Module):
         self.conv1 = GCNConv(self.num_node_feats + self.num_edge_feats,
                              self.latent_dim[0])
         self.conv2 = GCNConv(self.latent_dim[0], self.latent_dim[1])
-        self.conv3 = GCNConv(self.latent_dim[1], self.latent_dim[2])
-        self.conv4 = GCNConv(self.latent_dim[2], self.latent_dim[3])
+        # self.conv3 = GCNConv(self.latent_dim[1], self.latent_dim[2])
+        # self.conv4 = GCNConv(self.latent_dim[2], self.latent_dim[3])
 
         # conv1d
         self.conv1d_params1 = nn.Conv1d(
@@ -96,8 +96,9 @@ class DGCNN(torch.nn.Module):
         x, edge_attr, edge_index = data.x, data.edge_attr, data.edge_index
 
         graph_num = len(np.unique(
-            data.batch))  # len(np.unique(batch.batch))为batch中几个图
-        node_slice = torch.cumsum(torch.from_numpy(np.bincount(data.batch)), 0)
+            data.batch.cpu()))  # len(np.unique(batch.batch))为batch中几个图
+        node_slice = torch.cumsum(
+            torch.from_numpy(np.bincount(data.batch.cpu())), 0)
         node_slice = torch.cat([torch.tensor([0]), node_slice])
 
         # step 1: concatenate node_features and the node-relevant edge_features
@@ -118,10 +119,10 @@ class DGCNN(torch.nn.Module):
         x = out
         out = self.conv2(out, edge_index)
         x = torch.cat([x, out], 1)
-        out = self.conv3(out, edge_index)
-        x = torch.cat([x, out], 1)
-        out = self.conv4(out, edge_index)  # 最后一层GCN的输出，N*1维，作为sortpooling排序用
-        x = torch.cat([x, out], 1)
+        # out = self.conv3(out, edge_index)
+        # x = torch.cat([x, out], 1)
+        # out = self.conv4(out, edge_index)  # 最后一层GCN的输出，N*1维，作为sortpooling排序用
+        # x = torch.cat([x, out], 1)
 
         # step 3: sortpooling layer
         # 因为batch里不止一张图，所以要区分每个图单独进行sortpooling
@@ -185,11 +186,12 @@ class DGCNN(torch.nn.Module):
         return node_slice4edge
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = DGCNN(1, datasets.num_node_features, datasets.num_edge_features,
               datasets.num_classes).to(device)
 data = datasets.data.to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1, weight_decay=5e-4)
 
 model.train()
 optimizer.zero_grad()
@@ -197,6 +199,7 @@ num_epochs = 100
 for epoch in range(num_epochs):
     loader = DataLoader(datasets, batch_size=30, shuffle=True)
     total_loss = []
+    # loader.to(device)
     for batch in loader:
         batch.to(device)
         out = model(batch)
