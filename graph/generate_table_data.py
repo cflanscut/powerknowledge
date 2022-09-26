@@ -26,7 +26,11 @@ with open(osp.join(file_dir,
 open(osp.join(file_dir, 'table_data.txt'), 'w').close()
 
 count = 0
+<<<<<<< HEAD
 times_threshold = 9  # 20*0.3
+=======
+times_threshold = 8  # 20*0.4
+>>>>>>> 667980873b1d3306a8e5668994fffdca0cfa5e43
 
 for i in range(len(node_slice) - 1):
     node_list = {str(i): [-1] for i in range(30)}
